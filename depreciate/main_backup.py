@@ -4,20 +4,13 @@ import threading
 import pygame, random, pygame_gui
 from pygame.locals import *
 from planner import (
-    ProbabilisticRoadmap,
+    # ProbabilisticRoadmap,
     Color,
     # RRT,
     PotentialField,
     CircularObstacle,
 )
-# from planners.planners import (
-#     ProbabilisticRoadmap,
-#     Color,
-#     RRT,
-#     PotentialField,
-#     CircularObstacle,
-# )
-# from depreciate.search import Dijkstra, AStar, GreedyBFS
+# from search import Dijkstra, AStar, GreedyBFS
 
 
 class State:
@@ -48,6 +41,7 @@ def localize(map, pos):
     return pos[0] - map[0], pos[1] - map[1]
 
 
+# TODO: start, goal collision checking
 def generate_obs(num_obstacles, map_pos, map_dim, obs_dim):
     obs = []
     for i in range(num_obstacles):
@@ -87,6 +81,7 @@ class App:
     def __init__(self):
         self.sc = 0.8
         self.show_sim = True
+        # self.sc = 1
         self._running = True
         self._display_surf = None
         self.size = self.width, self.height = int(1600 * self.sc), int(
@@ -290,7 +285,8 @@ class App:
             manager=self.manager,
             container=self.option_ui_panel,
         )
-        self.prm_ui_options = {
+
+        # self.prm_ui_options = {
             "title": pygame_gui.elements.UILabel(
                 relative_rect=pygame.Rect(20, 20, 121, 40),
                 text="PRM Options",
@@ -346,27 +342,28 @@ class App:
                 container=self.option_ui_windows[State.PRM],
             ),
         }
-        self.rrt_ui_options = {
-            "title": pygame_gui.elements.UILabel(
-                relative_rect=pygame.Rect(20, 20, 105, 40),
-                text="RRT Options",
-                manager=self.manager,
-                container=self.option_ui_windows[State.RRT],
-            ),
-            "bias_slider_textbox": pygame_gui.elements.UILabel(
-                relative_rect=pygame.Rect(20, 60, 90, 35),
-                text=f'Bias: {self.rrt_options["bias"]}',
-                manager=self.manager,
-                container=self.option_ui_windows[State.RRT],
-            ),
-            "bias_slider": pygame_gui.elements.UIHorizontalSlider(
-                relative_rect=pygame.Rect(20, 95, 250, 40),
-                start_value=0.1,
-                value_range=(0, 1),
-                manager=self.manager,
-                container=self.option_ui_windows[State.RRT],
-            ),
-        }
+
+        # self.rrt_ui_options = {
+        #     "title": pygame_gui.elements.UILabel(
+        #         relative_rect=pygame.Rect(20, 20, 105, 40),
+        #         text="RRT Options",
+        #         manager=self.manager,
+        #         container=self.option_ui_windows[State.RRT],
+        #     ),
+        #     "bias_slider_textbox": pygame_gui.elements.UILabel(
+        #         relative_rect=pygame.Rect(20, 60, 90, 35),
+        #         text=f'Bias: {self.rrt_options["bias"]}',
+        #         manager=self.manager,
+        #         container=self.option_ui_windows[State.RRT],
+        #     ),
+        #     "bias_slider": pygame_gui.elements.UIHorizontalSlider(
+        #         relative_rect=pygame.Rect(20, 95, 250, 40),
+        #         start_value=0.1,
+        #         value_range=(0, 1),
+        #         manager=self.manager,
+        #         container=self.option_ui_windows[State.RRT],
+        #     ),
+        # }
         self.visualize_button = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect(20, 490, 250, 60),
             text="Simulate!",
@@ -640,24 +637,9 @@ class App:
         self.on_cleanup()
 
     def change_state(self, state):
-        if state == "Probabilistic Roadmap":
-            # if self.state != state:
-            #     if self.state == State.PF:
-            #         self.obstacles = []
-            #     self.state = State.PRM
-            #     self.init_state()
-            pass
-        elif state == "RRT":
-            # if self.state != state:
-            #     if self.state == State.PF:
-            #         self.obstacles = []
-            #     self.state = State.RRT
-            #     self.init_state()
-            pass
-        elif state == "Potential Field":
-            if self.state != state:
-                self.state = State.PF
-                self.init_state()
+        if self.state != state:
+            self.state = State.PF
+            self.init_state()
 
         self.change_active_options(self.state)
 
@@ -672,23 +654,7 @@ class App:
         else:
             self.toolbar_buttons["add_obs"].enable()
 
-    # def change_search(self, search):
-    #     if search == "Dijkstra" and self.search is not Dijkstra:
-    #         path = self.search.path
-    #         self.search = Dijkstra(self.planner.nodes)
-    #         self.search.path = path
-    #     elif search == "A*" and self.search is not AStar:
-    #         path = self.search.path
-    #         self.search = AStar(self.planner.nodes)
-    #         self.search.path = path
-    #     elif search == "Greedy Best First" and self.search is not GreedyBFS:
-    #         path = self.search.path
-    #         self.search = GreedyBFS(self.planner.nodes)
-    #         self.search.path = path
-    #     for node in self.planner.nodes:
-    #         node.parent = None
-    #         if node.search == self.search.name:
-    #             node.search = None
+
 
     def update_prm_samples(self):
         self.planner.set_obstacles(self.obstacles)
@@ -699,37 +665,16 @@ class App:
         self.t.start()
 
     def generate_obstacles(self):
-        if self.state == State.PRM:
-            # self.obstacles = generate_obs(
-            #     self.num_obstacles, self.map_pos, self.map_size, self.obs_dim
-            # )
-            # self.planner.set_obstacles(self.obstacles)
-            # self.planner.nodes = []
 
-            # self.search.path = []
-            # self.t = threading.Thread(
-            #     target=self.planner.sample, args=(self.prm_options["sample_size"],)
-            # )
-            # self.t.start()
-            pass
-        elif self.state == State.RRT:
-            pass
-            # self.obstacles = generate_obs(
-            #     self.num_obstacles, self.map_pos, self.map_size, self.obs_dim
-            # )
-            # self.planner.set_obstacles(self.obstacles)
-            # self.planner.nodes = []
-
-        elif self.state == State.PF:
-            self.obstacles = generate_circle_obs(
-                self.num_obstacles,
-                self.map_pos,
-                self.map_size,
-                self.circle_obs_dim,
-                self.goal_pose,
-            )
-            self.planner.set_obstacles(self.obstacles)
-            self.planner.updated = True
+        self.obstacles = generate_circle_obs(
+            self.num_obstacles,
+            self.map_pos,
+            self.map_size,
+            self.circle_obs_dim,
+            self.goal_pose,
+        )
+        self.planner.set_obstacles(self.obstacles)
+        self.planner.updated = True
 
     def add_obstacle(self, rect):
         self.obstacles.append(rect)
@@ -745,37 +690,6 @@ class App:
             pass
 
     def renderState(self):
-        # if self.state == State.PRM:
-        #     for obj in self.obstacles:
-        #         pygame.draw.rect(self.map, Color.LIGHT_PURPLE, obj)
-
-        #     for node in self.planner.nodes:
-        #         node.draw(self.map, self.node_radius, 1)
-
-        #     for node in self.search.path:
-        #         pygame.draw.circle(
-        #             self.map,
-        #             Color.GREEN,
-        #             node.get_coords(),
-        #             self.node_radius + 2,
-        #             width=0,
-        #         )
-
-        # if self.state == State.RRT:
-        #     for obj in self.obstacles:
-        #         pygame.draw.rect(self.map, Color.LIGHT_PURPLE, obj)
-
-        #     for node in self.planner.nodes:
-        #         node.draw(self.map, self.node_radius, 1)
-
-        #     for node in self.planner.path:
-        #         pygame.draw.circle(
-        #             self.map,
-        #             Color.RED,
-        #             node.get_coords(),
-        #             self.node_radius + 2,
-        #             width=0,
-        #         )
 
         if self.state == State.PF:
             for obs in self.obstacles:
@@ -793,69 +707,29 @@ class App:
                 )
 
     def simulateState(self):
-        # if self.state == State.PRM:
-        #     self.planner.create_network(
-        #         self.map, self.node_radius, self.prm_options["neighbours"]
-        #     )
-        #     if self.t is None or not self.t.is_alive():
-        #         self.t = threading.Thread(
-        #             target=self.search.solve,
-        #             args=(
-        #                 self.planner.nodes,
-        #                 self.planner.get_start_node(),
-        #                 self.planner.get_end_node(),
-        #             ),
-        #         )
-        #         self.t.start()
-        # if self.state == State.RRT:
-        #     if self.t is None or not self.t.is_alive():
-        #         self.t = threading.Thread(target=self.planner.start, daemon=True)
-        #         self.t.start()
-        if self.state == State.PF:
-            self.planner.updated = True
-            if self.t is None or not self.t.is_alive():
-                self.t = threading.Thread(target=self.planner.start, daemon=True)
-                self.t.start()
-            else:
-                self.t.join()
-                self.t = threading.Thread(target=self.planner.start, daemon=True)
-                self.t.start()
+
+        self.planner.updated = True
+        if self.t is None or not self.t.is_alive():
+            self.t = threading.Thread(target=self.planner.start, daemon=True)
+            self.t.start()
+        else:
+            self.t.join()
+            self.t = threading.Thread(target=self.planner.start, daemon=True)
+            self.t.start()
 
     def update_pose(self):
         self.planner.update_pose(self.start_pose, self.goal_pose)
-        if self.state == State.PRM:
-            # self.t = threading.Thread(
-            #     target=self.search.update_solution,
-            #     args=(
-            #         self.planner.get_start_node(),
-            #         self.planner.get_end_node(),
-            #     ),
-            # )
-            # self.t.start()
-            pass
-        # elif self.state == State.RRT:
-        #     if self.t is None or not self.t.is_alive():
-        #         self.t = threading.Thread(target=self.planner.start, daemon=True)
-        #         self.t.start()
-        elif self.state == State.PF:
-            self.planner.updated = True
-            if self.t is None or not self.t.is_alive():
-                self.t = threading.Thread(target=self.planner.start, daemon=True)
-                self.t.start()
-            else:
-                self.t.join()
-                self.t = threading.Thread(target=self.planner.start, daemon=True)
-                self.t.start()
+
+        self.planner.updated = True
+        if self.t is None or not self.t.is_alive():
+            self.t = threading.Thread(target=self.planner.start, daemon=True)
+            self.t.start()
+        else:
+            self.t.join()
+            self.t = threading.Thread(target=self.planner.start, daemon=True)
+            self.t.start()
 
     def resetObstacles(self):
-        # if self.state == State.PRM:
-        #     self.planner.obstacles = []
-        #     self.obstacles = []
-        #     self.search.path = []
-        # elif self.state == State.RRT:
-        #     self.planner.obstacles = []
-        #     self.obstacles = []
-        #     self.planner.path = []
         self.planner.obstacles = []
         self.obstacles = []
         self.planner.path = []
