@@ -411,9 +411,6 @@ class App:
                         manager=self.manager,
                         container=self.option_ui_panel,
                     )
-
-  
-
             if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == self.toolbar_buttons["add_obs"]:
                     self.flags["set_obs"] = True
@@ -539,38 +536,6 @@ class App:
             pass
 
     def renderState(self):
-        # if self.state == State.PRM:
-        #     for obj in self.obstacles:
-        #         pygame.draw.rect(self.map, Color.LIGHT_PURPLE, obj)
-
-        #     for node in self.planner.nodes:
-        #         node.draw(self.map, self.node_radius, 1)
-
-        #     for node in self.search.path:
-        #         pygame.draw.circle(
-        #             self.map,
-        #             Color.GREEN,
-        #             node.get_coords(),
-        #             self.node_radius + 2,
-        #             width=0,
-        #         )
-
-        # if self.state == State.RRT:
-        #     for obj in self.obstacles:
-        #         pygame.draw.rect(self.map, Color.LIGHT_PURPLE, obj)
-
-        #     for node in self.planner.nodes:
-        #         node.draw(self.map, self.node_radius, 1)
-
-        #     for node in self.planner.path:
-        #         pygame.draw.circle(
-        #             self.map,
-        #             Color.RED,
-        #             node.get_coords(),
-        #             self.node_radius + 2,
-        #             width=0,
-        #         )
-
         if self.state == State.PF:
             for obs in self.obstacles:
                 pygame.draw.circle(
@@ -587,24 +552,6 @@ class App:
                 )
 
     def simulateState(self):
-        # if self.state == State.PRM:
-        #     self.planner.create_network(
-        #         self.map, self.node_radius, self.prm_options["neighbours"]
-        #     )
-        #     if self.t is None or not self.t.is_alive():
-        #         self.t = threading.Thread(
-        #             target=self.search.solve,
-        #             args=(
-        #                 self.planner.nodes,
-        #                 self.planner.get_start_node(),
-        #                 self.planner.get_end_node(),
-        #             ),
-        #         )
-        #         self.t.start()
-        # if self.state == State.RRT:
-        #     if self.t is None or not self.t.is_alive():
-        #         self.t = threading.Thread(target=self.planner.start, daemon=True)
-        #         self.t.start()
         if self.state == State.PF:
             self.planner.updated = True
             if self.t is None or not self.t.is_alive():
@@ -618,19 +565,7 @@ class App:
     def update_pose(self):
         self.planner.update_pose(self.start_pose, self.goal_pose)
         if self.state == State.PRM:
-            # self.t = threading.Thread(
-            #     target=self.search.update_solution,
-            #     args=(
-            #         self.planner.get_start_node(),
-            #         self.planner.get_end_node(),
-            #     ),
-            # )
-            # self.t.start()
             pass
-        # elif self.state == State.RRT:
-        #     if self.t is None or not self.t.is_alive():
-        #         self.t = threading.Thread(target=self.planner.start, daemon=True)
-        #         self.t.start()
         elif self.state == State.PF:
             self.planner.updated = True
             if self.t is None or not self.t.is_alive():
@@ -642,14 +577,6 @@ class App:
                 self.t.start()
 
     def resetObstacles(self):
-        # if self.state == State.PRM:
-        #     self.planner.obstacles = []
-        #     self.obstacles = []
-        #     self.search.path = []
-        # elif self.state == State.RRT:
-        #     self.planner.obstacles = []
-        #     self.obstacles = []
-        #     self.planner.path = []
         self.planner.obstacles = []
         self.obstacles = []
         self.planner.path = []
