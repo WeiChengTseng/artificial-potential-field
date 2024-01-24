@@ -1,4 +1,4 @@
 pygame-gui==0.6.5
 pygame==2.0.3
-numpy==1.21.0
+numpy==1.26.3
 jupyter
