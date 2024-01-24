@@ -8,78 +8,6 @@ import numpy as np
 import pygame
 
 
-
-class Node:
-    def __init__(self, x, y, id):
-        self.x = x
-        self.y = y
-        self.id = id
-        self.parent = None
-        self.search = None
-        self.adj = {}
-        self.edge = {}
-
-    def get_coords(self):
-        return self.x, self.y
-
-    def add_neighbour(self, neighbour):
-        self.adj[neighbour] = self.__euclidean_dist(neighbour)
-        self.edge[neighbour] = NodeEdge(self, neighbour)
-
-    def __euclidean_dist(self, neighbour):
-        return math.hypot((self.x - neighbour.x), (self.y - neighbour.y))
-
-    def get_connections(self):
-        return self.adj.keys()
-
-    def get_weight(self, neighbour):
-        return self.adj[neighbour]
-
-    def draw(self, surf, node_radius, width):
-        for neighbour in self.edge:
-            color = Color.GREY
-            # if neighbour.search == "Dijkstra":
-            #     color = Color.BLUE
-            # if neighbour.search == "AStar":
-            #     color = Color.RED
-            # if neighbour.search == "GreedyBFS":
-            #     color = Color.LIGHT_BLUE
-            pygame.draw.line(
-                surf,
-                color,
-                self.edge[neighbour].nfrom.get_coords(),
-                self.edge[neighbour].nto.get_coords(),
-                width=width,
-            )
-        pygame.draw.circle(
-            surf, Color.LIGHTGREY, self.get_coords(), node_radius, width=0
-        )
-
-    def __str__(self):
-        return f"{self.x}, {self.y}, {self.id}"
-
-
-# Used to visualize pathfinding
-class NodeEdge:
-    def __init__(self, node_from: Node, node_to: Node):
-        self.nfrom = node_from
-        self.nto = node_to
-
-
-class CircularObstacle:
-    def __init__(self, x, y, rad):
-        self.x = x
-        self.y = y
-        self.rad = rad
-
-    def collidepoint(self, point):
-        d = math.hypot(point[0] - self.x, point[1] - self.y)
-        if d <= self.rad:
-            return True
-        return False
-
-
-#  Extended on implementation from https://github.com/jlehett/Pytential-Fields to include virtual field calculations and better fit the project's usecase
 class PotentialField:
     def __init__(
         self,
@@ -92,8 +20,7 @@ class PotentialField:
         map_surf,
         virtual,
     ):
-        self.min_vel = 2
-        self.max_vel = 40
+        self.min_vel, self.max_vel = 2, 40
         self.map_dim = self.mapw, self.maph = map_dim
 
         self.field = np.zeros((self.mapw, self.maph, 2))
@@ -118,6 +45,8 @@ class PotentialField:
         self.map_surf = map_surf
 
     def start(self):
+        # TODO: 
+        # 
         self.goal_field = self.attract_goal(self.goal_radius)
         self.field = self.goal_field
         self.updated = False
@@ -126,27 +55,12 @@ class PotentialField:
                 self.obstacle_field[obs] = self.repel_obstacle(obs)
             self.field += self.obstacle_field[obs]
 
-        self.clampField(25)
+        # -----------------------------------------------------------
+
+        self.clamp_field(25)
         self.make_path()
 
-    def draw(self, surface, stride=(25, 25)):
-        # Iterate through the field with proper strides
-        bufferX = math.floor(stride[0] / 2.0)
-        bufferY = math.floor(stride[1] / 2.0)
-        for fieldX in range(bufferX, self.mapw - bufferX, stride[0]):
-            for fieldY in range(bufferY, self.maph - bufferY, stride[1]):
-                # Grab the field vector for the cell
-                fieldVector = self.field[fieldX, fieldY]
-                # Determine the x and y coordinate for the origin of the
-                # potential line segment.
-                startPixelX = fieldX
-                startPixelY = fieldY
-                # Determine the x and y coordinate for the end point of the
-                # potential line segment.
-                endPixelX = math.floor(startPixelX + fieldVector[0])
-                endPixelY = math.floor(startPixelY + fieldVector[1])
-                # Draw the vector to the pygame surface
-                drawArrow(surface, (startPixelX, startPixelY), (endPixelX, endPixelY))
+
 
     def attract_goal(self, radius):
         target_pos = self.goal_pose
@@ -161,8 +75,12 @@ class PotentialField:
         field[:, :, 0] = meshgridX
         field[:, :, 1] = meshgridY
 
+        # 
+
         magnitudeField = np.sqrt((field[:, :, 0] ** 2 + field[:, :, 1] ** 2) * 2)
         magnitudeField = np.clip(magnitudeField, 0.0000001, math.inf)
+
+        # 
 
         # Create normal field
         normalField = np.zeros((self.mapw, self.maph, 2))
@@ -219,7 +137,26 @@ class PotentialField:
         field[:, :, 1] = normalField[:, :, 1] * magnitudeField
         return field
 
-    def clampField(self, maxVel):
+    def draw(self, surface, stride=(25, 25)):
+        # Iterate through the field with proper strides
+        bufferX = math.floor(stride[0] / 2.0)
+        bufferY = math.floor(stride[1] / 2.0)
+        for fieldX in range(bufferX, self.mapw - bufferX, stride[0]):
+            for fieldY in range(bufferY, self.maph - bufferY, stride[1]):
+                # Grab the field vector for the cell
+                fieldVector = self.field[fieldX, fieldY]
+                # Determine the x and y coordinate for the origin of the
+                # potential line segment.
+                startPixelX = fieldX
+                startPixelY = fieldY
+                # Determine the x and y coordinate for the end point of the
+                # potential line segment.
+                endPixelX = math.floor(startPixelX + fieldVector[0])
+                endPixelY = math.floor(startPixelY + fieldVector[1])
+                # Draw the vector to the pygame surface
+                drawArrow(surface, (startPixelX, startPixelY), (endPixelX, endPixelY))
+
+    def clamp_field(self, maxVel):
         """
         Clamp potential field such that the magnitude does not
         exceed maxVel
@@ -264,7 +201,7 @@ class PotentialField:
                         self.fcf * math.cos(theta) * vec[0],
                         self.fcf * math.sin(theta) * vec[1],
                     ]
-                    self.clampField(25)
+                    self.clamp_field(25)
                 else:
                     time.sleep(0.02)
             else:
@@ -364,3 +301,67 @@ def cvtRange(x, in_min, in_max, out_min, out_max):
     (out_min to out_max)
     """
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+
+
+class Node:
+    def __init__(self, x, y, id):
+        self.x = x
+        self.y = y
+        self.id = id
+        self.parent = None
+        self.search = None
+        self.adj = {}
+        self.edge = {}
+
+    def get_coords(self):
+        return self.x, self.y
+
+    def add_neighbour(self, neighbour):
+        self.adj[neighbour] = self.__euclidean_dist(neighbour)
+        self.edge[neighbour] = NodeEdge(self, neighbour)
+
+    def __euclidean_dist(self, neighbour):
+        return math.hypot((self.x - neighbour.x), (self.y - neighbour.y))
+
+    def get_connections(self):
+        return self.adj.keys()
+
+    def get_weight(self, neighbour):
+        return self.adj[neighbour]
+
+    def draw(self, surf, node_radius, width):
+        for neighbour in self.edge:
+            color = Color.GREY
+            pygame.draw.line(
+                surf,
+                color,
+                self.edge[neighbour].nfrom.get_coords(),
+                self.edge[neighbour].nto.get_coords(),
+                width=width,
+            )
+        pygame.draw.circle(
+            surf, Color.LIGHTGREY, self.get_coords(), node_radius, width=0
+        )
+
+    def __str__(self):
+        return f"{self.x}, {self.y}, {self.id}"
+
+
+# Used to visualize pathfinding
+class NodeEdge:
+    def __init__(self, node_from: Node, node_to: Node):
+        self.nfrom = node_from
+        self.nto = node_to
+
+
+class CircularObstacle:
+    def __init__(self, x, y, rad):
+        self.x = x
+        self.y = y
+        self.rad = rad
+
+    def collidepoint(self, point):
+        d = math.hypot(point[0] - self.x, point[1] - self.y)
+        if d <= self.rad:
+            return True
+        return False

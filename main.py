@@ -4,7 +4,7 @@ import threading
 import pygame, random, pygame_gui
 from pygame.locals import *
 from planner import (
-    ProbabilisticRoadmap,
+    # ProbabilisticRoadmap,
     Color,
     # RRT,
     PotentialField,
@@ -148,7 +148,7 @@ class App:
         # RRT OPTIONS
         self.rrt_options = {"bias": 0.1}
 
-        self.pf_options = {"virtual": True}
+        self.pf_options = {"virtual": False}
 
         # FLAGS
         self.flags = {"set_obs": False, "drag_start": False, "drag_goal": False}
@@ -164,8 +164,8 @@ class App:
         self.obstacle_textbox = None
         self.obstacle_slider = None
         self.visualize_button = None
-        self.rrt_ui_options = None
-        self.prm_ui_options = None
+        # self.rrt_ui_options = None
+        # self.prm_ui_options = None
         self.pf_ui_options = None
         self.planner = None
         self.search = None
@@ -250,18 +250,6 @@ class App:
         )
 
         self.option_ui_windows = {
-            State.RRT: pygame_gui.core.UIContainer(
-                relative_rect=pygame.Rect((0, 120), self.optionp_size),
-                manager=self.manager,
-                object_id="rrt",
-                container=self.option_ui_panel,
-            ),
-            State.PRM: pygame_gui.core.UIContainer(
-                relative_rect=pygame.Rect((0, 120), self.optionp_size),
-                manager=self.manager,
-                object_id="prm",
-                container=self.option_ui_panel,
-            ),
             State.PF: pygame_gui.core.UIContainer(
                 relative_rect=pygame.Rect((0, self.optionp_h / 3.5), self.optionp_size),
                 manager=self.manager,
@@ -290,83 +278,8 @@ class App:
             manager=self.manager,
             container=self.option_ui_panel,
         )
-        self.prm_ui_options = {
-            "title": pygame_gui.elements.UILabel(
-                relative_rect=pygame.Rect(20, 20, 121, 40),
-                text="PRM Options",
-                manager=self.manager,
-                container=self.option_ui_windows[State.PRM],
-                object_id="header",
-            ),
-            "sample_slider_textbox": pygame_gui.elements.UILabel(
-                relative_rect=pygame.Rect(20, 60, 145, 35),
-                text=f'Sample Size: {self.prm_options["sample_size"]}',
-                manager=self.manager,
-                container=self.option_ui_windows[State.PRM],
-            ),
-            "sample_slider": pygame_gui.elements.UIHorizontalSlider(
-                relative_rect=pygame.Rect(20, 95, 250, 40),
-                start_value=self.prm_options["sample_size"],
-                value_range=(100, 1500),
-                manager=self.manager,
-                container=self.option_ui_windows[State.PRM],
-            ),
-            "neighbour_slider_textbox": pygame_gui.elements.UILabel(
-                relative_rect=pygame.Rect(20, 150, 196, 35),
-                text=f'Connect to {self.prm_options["neighbours"]} neighbours',
-                manager=self.manager,
-                container=self.option_ui_windows[State.PRM],
-            ),
-            "neighbour_slider": pygame_gui.elements.UIHorizontalSlider(
-                relative_rect=pygame.Rect(20, 185, 250, 40),
-                start_value=self.prm_options["neighbours"],
-                value_range=(1, 20),
-                manager=self.manager,
-                container=self.option_ui_windows[State.PRM],
-            ),
-            "set_k": pygame_gui.elements.UIButton(
-                relative_rect=pygame.Rect(20, 235, 250, 40),
-                text="Set Neighbours",
-                manager=self.manager,
-                container=self.option_ui_windows[State.PRM],
-            ),
-            "search_textbox": pygame_gui.elements.UILabel(
-                relative_rect=pygame.Rect(
-                    20, 285, 60, 40
-                ),  # the drop down menu keeps moving the label ???
-                text="Search",
-                manager=self.manager,
-                container=self.option_ui_windows[State.PRM],
-            ),
-            "search_options": pygame_gui.elements.UIDropDownMenu(
-                self.searches,
-                self.default_search,
-                pygame.Rect(20, 320, 250, 40),
-                manager=self.manager,
-                container=self.option_ui_windows[State.PRM],
-            ),
-        }
-        self.rrt_ui_options = {
-            "title": pygame_gui.elements.UILabel(
-                relative_rect=pygame.Rect(20, 20, 105, 40),
-                text="RRT Options",
-                manager=self.manager,
-                container=self.option_ui_windows[State.RRT],
-            ),
-            "bias_slider_textbox": pygame_gui.elements.UILabel(
-                relative_rect=pygame.Rect(20, 60, 90, 35),
-                text=f'Bias: {self.rrt_options["bias"]}',
-                manager=self.manager,
-                container=self.option_ui_windows[State.RRT],
-            ),
-            "bias_slider": pygame_gui.elements.UIHorizontalSlider(
-                relative_rect=pygame.Rect(20, 95, 250, 40),
-                start_value=0.1,
-                value_range=(0, 1),
-                manager=self.manager,
-                container=self.option_ui_windows[State.RRT],
-            ),
-        }
+
+
         self.visualize_button = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect(20, 490, 250, 60),
             text="Simulate!",
@@ -402,47 +315,20 @@ class App:
         self.init_state()
 
     def init_state(self):
-        if self.state == State.PRM:
-            # self.planner = ProbabilisticRoadmap(
-            #     self.map_size,
-            #     self.start_pose,
-            #     self.start_radius,
-            #     self.goal_pose,
-            #     self.goal_radius,
-            #     self.obstacles,
-            #     self.prm_options["neighbours"],
-            # )
-            # self.search = AStar(self.planner.nodes)
 
-            # self.t = threading.Thread(
-            #     target=self.planner.sample, args=(self.prm_options["sample_size"],)
-            # )
-            # self.t.start()
-            pass
-        # elif self.state == State.RRT:
-        #     self.planner = RRT(
-        #         self.map_size,
-        #         self.start_pose,
-        #         self.start_radius,
-        #         self.goal_pose,
-        #         self.goal_radius,
-        #         self.obstacles,
-        #         self.rrt_options["bias"],
-        #     )
-        elif self.state == State.PF:
-            self.obstacles = []
-            self.planner = PotentialField(
-                self.map_size,
-                self.start_pose,
-                self.start_radius,
-                self.goal_pose,
-                self.goal_radius,
-                self.obstacles,
-                self.map,
-                self.pf_options["virtual"],
-            )
-            self.t = threading.Thread(target=self.planner.start)
-            self.t.start()
+        self.obstacles = []
+        self.planner = PotentialField(
+            self.map_size,
+            self.start_pose,
+            self.start_radius,
+            self.goal_pose,
+            self.goal_radius,
+            self.obstacles,
+            self.map,
+            self.pf_options["virtual"],
+        )
+        self.t = threading.Thread(target=self.planner.start)
+        self.t.start()
 
     def on_event(self, event):
         if event.type == pygame.QUIT:
@@ -526,43 +412,8 @@ class App:
                         container=self.option_ui_panel,
                     )
 
-                if event.ui_element == self.rrt_ui_options["bias_slider"]:
-                    self.rrt_options["bias"] = round(event.value, 2)
-                    self.rrt_ui_options["bias_slider_textbox"].kill()
-                    self.rrt_ui_options[
-                        "bias_slider_textbox"
-                    ] = pygame_gui.elements.UILabel(
-                        relative_rect=pygame.Rect(20, 60, 90, 35),
-                        text=f'Bias: {self.rrt_options["bias"]}',
-                        manager=self.manager,
-                        container=self.option_ui_windows[State.RRT],
-                    )
-                    self.planner.set_bias(self.rrt_options["bias"])
+  
 
-                if event.ui_element == self.prm_ui_options["sample_slider"]:
-                    self.prm_options["sample_size"] = event.value
-                    self.prm_ui_options["sample_slider_textbox"].kill()
-                    self.prm_ui_options[
-                        "sample_slider_textbox"
-                    ] = pygame_gui.elements.UILabel(
-                        relative_rect=pygame.Rect(20, 60, 145, 35),
-                        text=f'Sample Size: {self.prm_options["sample_size"]}',
-                        manager=self.manager,
-                        container=self.option_ui_windows[State.PRM],
-                    )
-                    self.update_prm_samples()
-
-                if event.ui_element == self.prm_ui_options["neighbour_slider"]:
-                    self.prm_options["neighbours"] = event.value
-                    self.prm_ui_options["neighbour_slider_textbox"].kill()
-                    self.prm_ui_options[
-                        "neighbour_slider_textbox"
-                    ] = pygame_gui.elements.UILabel(
-                        relative_rect=pygame.Rect(20, 150, 196, 35),
-                        text=f'Connect to {self.prm_options["neighbours"]} neighbours',
-                        manager=self.manager,
-                        container=self.option_ui_windows[State.PRM],
-                    )
             if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == self.toolbar_buttons["add_obs"]:
                     self.flags["set_obs"] = True
@@ -572,9 +423,6 @@ class App:
                     self.resetObstacles()
                 if event.ui_element == self.visualize_button:
                     self.simulateState()
-                if event.ui_element == self.prm_ui_options["set_k"]:
-                    self.planner.update_k(self.prm_options["neighbours"])
-                    self.search.path = []
                 if event.ui_element == self.pf_ui_options["virtual_button"]:
                     self.pf_options["virtual"] = not self.pf_options["virtual"]
                     self.pf_ui_options["virtual_textbox"].kill()
@@ -640,24 +488,9 @@ class App:
         self.on_cleanup()
 
     def change_state(self, state):
-        if state == "Probabilistic Roadmap":
-            # if self.state != state:
-            #     if self.state == State.PF:
-            #         self.obstacles = []
-            #     self.state = State.PRM
-            #     self.init_state()
-            pass
-        elif state == "RRT":
-            # if self.state != state:
-            #     if self.state == State.PF:
-            #         self.obstacles = []
-            #     self.state = State.RRT
-            #     self.init_state()
-            pass
-        elif state == "Potential Field":
-            if self.state != state:
-                self.state = State.PF
-                self.init_state()
+        if self.state != state:
+            self.state = State.PF
+            self.init_state()
 
         self.change_active_options(self.state)
 
@@ -672,23 +505,6 @@ class App:
         else:
             self.toolbar_buttons["add_obs"].enable()
 
-    # def change_search(self, search):
-    #     if search == "Dijkstra" and self.search is not Dijkstra:
-    #         path = self.search.path
-    #         self.search = Dijkstra(self.planner.nodes)
-    #         self.search.path = path
-    #     elif search == "A*" and self.search is not AStar:
-    #         path = self.search.path
-    #         self.search = AStar(self.planner.nodes)
-    #         self.search.path = path
-    #     elif search == "Greedy Best First" and self.search is not GreedyBFS:
-    #         path = self.search.path
-    #         self.search = GreedyBFS(self.planner.nodes)
-    #         self.search.path = path
-    #     for node in self.planner.nodes:
-    #         node.parent = None
-    #         if node.search == self.search.name:
-    #             node.search = None
 
     def update_prm_samples(self):
         self.planner.set_obstacles(self.obstacles)
@@ -699,37 +515,15 @@ class App:
         self.t.start()
 
     def generate_obstacles(self):
-        if self.state == State.PRM:
-            # self.obstacles = generate_obs(
-            #     self.num_obstacles, self.map_pos, self.map_size, self.obs_dim
-            # )
-            # self.planner.set_obstacles(self.obstacles)
-            # self.planner.nodes = []
-
-            # self.search.path = []
-            # self.t = threading.Thread(
-            #     target=self.planner.sample, args=(self.prm_options["sample_size"],)
-            # )
-            # self.t.start()
-            pass
-        elif self.state == State.RRT:
-            pass
-            # self.obstacles = generate_obs(
-            #     self.num_obstacles, self.map_pos, self.map_size, self.obs_dim
-            # )
-            # self.planner.set_obstacles(self.obstacles)
-            # self.planner.nodes = []
-
-        elif self.state == State.PF:
-            self.obstacles = generate_circle_obs(
-                self.num_obstacles,
-                self.map_pos,
-                self.map_size,
-                self.circle_obs_dim,
-                self.goal_pose,
-            )
-            self.planner.set_obstacles(self.obstacles)
-            self.planner.updated = True
+        self.obstacles = generate_circle_obs(
+            self.num_obstacles,
+            self.map_pos,
+            self.map_size,
+            self.circle_obs_dim,
+            self.goal_pose,
+        )
+        self.planner.set_obstacles(self.obstacles)
+        self.planner.updated = True
 
     def add_obstacle(self, rect):
         self.obstacles.append(rect)
