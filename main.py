@@ -4,26 +4,13 @@ import threading
 import pygame, random, pygame_gui
 from pygame.locals import *
 from planner import (
-    # ProbabilisticRoadmap,
     Color,
-    # RRT,
     PotentialField,
     CircularObstacle,
 )
-# from planners.planners import (
-#     ProbabilisticRoadmap,
-#     Color,
-#     RRT,
-#     PotentialField,
-#     CircularObstacle,
-# )
-# from depreciate.search import Dijkstra, AStar, GreedyBFS
 
 
-class State:
-    PRM = 0
-    RRT = 1
-    PF = 2
+
 
 
 """
@@ -33,54 +20,7 @@ class State:
 """
 
 
-def sample_envir(map_pos, map_dim, obs_dim):
-    sx = map_pos[0]
-    sy = map_pos[1]
-    ex = sx + map_dim[0] - obs_dim[0]
-    ey = sy + map_dim[1] - obs_dim[1]
-    x = int(random.uniform(sx, ex))
-    y = int(random.uniform(sy, ey))
 
-    return (x, y)
-
-
-def localize(map, pos):
-    return pos[0] - map[0], pos[1] - map[1]
-
-
-def generate_obs(num_obstacles, map_pos, map_dim, obs_dim):
-    obs = []
-    for i in range(num_obstacles):
-        rect = None
-        collision = True
-        while collision:
-            pos = sample_envir(map_pos, map_dim, obs_dim)
-            size = (
-                int(random.uniform(10, obs_dim[0])),
-                int(random.uniform(10, obs_dim[1])),
-            )
-            rect = pygame.Rect(pos, size)
-            collision = False
-            for obj in obs:
-                if rect.colliderect(obj):
-                    collision = True
-                    break
-        obs.append(rect)
-    return obs
-
-
-def generate_circle_obs(num_obstacles, map_pos, map_size, circle_obs_dim, goal_pose):
-    obs = []
-    for i in range(num_obstacles):
-        collision = True
-        while collision:
-            pos = sample_envir(map_pos, map_size, (circle_obs_dim, circle_obs_dim))
-            rad = int(random.uniform(10, circle_obs_dim))
-            circle = CircularObstacle(*pos, rad)
-            collision = circle.collidepoint(goal_pose)
-
-        obs.append(circle)
-    return obs
 
 
 class App:
@@ -143,10 +83,10 @@ class App:
         self.path = []
 
         # PRM OPTIONS
-        self.prm_options = {"sample_size": 800, "neighbours": 10}
+        # self.prm_options = {"sample_size": 800, "neighbours": 10}
 
         # RRT OPTIONS
-        self.rrt_options = {"bias": 0.1}
+        # self.rrt_options = {"bias": 0.1}
 
         self.pf_options = {"virtual": False}
 
@@ -503,13 +443,13 @@ class App:
             self.toolbar_buttons["add_obs"].enable()
 
 
-    def update_prm_samples(self):
-        self.planner.set_obstacles(self.obstacles)
-        self.search.path = []
-        self.t = threading.Thread(
-            target=self.planner.sample, args=(self.prm_options["sample_size"],)
-        )
-        self.t.start()
+    # def update_prm_samples(self):
+    #     self.planner.set_obstacles(self.obstacles)
+    #     self.search.path = []
+    #     self.t = threading.Thread(
+    #         target=self.planner.sample, args=(self.prm_options["sample_size"],)
+    #     )
+    #     self.t.start()
 
     def generate_obstacles(self):
         self.obstacles = generate_circle_obs(
@@ -525,15 +465,16 @@ class App:
     def add_obstacle(self, rect):
         self.obstacles.append(rect)
         self.planner.set_obstacles(self.obstacles)
-        if self.state == State.PRM:
-            self.t = threading.Thread(
-                target=self.planner.sample, args=(self.prm_options["sample_size"],)
-            )
-            self.t.start()
-        elif self.state == State.RRT:
-            pass
-        elif self.state == State.PF:
-            pass
+        # if self.state == State.PRM:
+        #     # self.t = threading.Thread(
+        #     #     target=self.planner.sample, args=(self.prm_options["sample_size"],)
+        #     # )
+        #     # self.t.start()
+        #     pass
+        # elif self.state == State.RRT:
+        #     pass
+        # elif self.state == State.PF:
+        #     pass
 
     def renderState(self):
         if self.state == State.PF:
@@ -581,6 +522,59 @@ class App:
         self.obstacles = []
         self.planner.path = []
 
+class State:
+    PRM = 0
+    RRT = 1
+    PF = 2
+
+
+def sample_envir(map_pos, map_dim, obs_dim):
+    sx = map_pos[0]
+    sy = map_pos[1]
+    ex = sx + map_dim[0] - obs_dim[0]
+    ey = sy + map_dim[1] - obs_dim[1]
+    x = int(random.uniform(sx, ex))
+    y = int(random.uniform(sy, ey))
+    return (x, y)
+
+
+def localize(map, pos):
+    return pos[0] - map[0], pos[1] - map[1]
+
+
+def generate_obs(num_obstacles, map_pos, map_dim, obs_dim):
+    obs = []
+    for i in range(num_obstacles):
+        rect = None
+        collision = True
+        while collision:
+            pos = sample_envir(map_pos, map_dim, obs_dim)
+            size = (
+                int(random.uniform(10, obs_dim[0])),
+                int(random.uniform(10, obs_dim[1])),
+            )
+            rect = pygame.Rect(pos, size)
+            collision = False
+            for obj in obs:
+                if rect.colliderect(obj):
+                    collision = True
+                    break
+        obs.append(rect)
+    return obs
+
+
+def generate_circle_obs(num_obstacles, map_pos, map_size, circle_obs_dim, goal_pose):
+    obs = []
+    for i in range(num_obstacles):
+        collision = True
+        while collision:
+            pos = sample_envir(map_pos, map_size, (circle_obs_dim, circle_obs_dim))
+            rad = int(random.uniform(10, circle_obs_dim))
+            circle = CircularObstacle(*pos, rad)
+            collision = circle.collidepoint(goal_pose)
+
+        obs.append(circle)
+    return obs
 
 if __name__ == "__main__":
     theApp = App()

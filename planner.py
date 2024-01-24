@@ -45,8 +45,7 @@ class PotentialField:
         self.map_surf = map_surf
 
     def start(self):
-        # TODO: 
-        # 
+
         self.goal_field = self.attract_goal(self.goal_radius)
         self.field = self.goal_field
         self.updated = False
@@ -55,12 +54,8 @@ class PotentialField:
                 self.obstacle_field[obs] = self.repel_obstacle(obs)
             self.field += self.obstacle_field[obs]
 
-        # -----------------------------------------------------------
-
         self.clamp_field(25)
         self.make_path()
-
-
 
     def attract_goal(self, radius):
         target_pos = self.goal_pose
@@ -75,12 +70,12 @@ class PotentialField:
         field[:, :, 0] = meshgridX
         field[:, :, 1] = meshgridY
 
-        # 
+        # TODO
 
         magnitudeField = np.sqrt((field[:, :, 0] ** 2 + field[:, :, 1] ** 2) * 2)
         magnitudeField = np.clip(magnitudeField, 0.0000001, math.inf)
 
-        # 
+        #
 
         # Create normal field
         normalField = np.zeros((self.mapw, self.maph, 2))
@@ -147,8 +142,8 @@ class PotentialField:
                 fieldVector = self.field[fieldX, fieldY]
                 # Determine the x and y coordinate for the origin of the
                 # potential line segment.
-                startPixelX = fieldX
-                startPixelY = fieldY
+                startPixelX, startPixelY = fieldX, fieldY
+                # startPixelY = fieldY
                 # Determine the x and y coordinate for the end point of the
                 # potential line segment.
                 endPixelX = math.floor(startPixelX + fieldVector[0])
